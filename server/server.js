@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const multer = require("multer");
 const path = require("path");
-const cors = require("cors"); 
+const cors = require("cors");
 const File = require("../Models/File");
 
 // Charger les variables d'environnement (.env)
@@ -16,8 +16,8 @@ const app = express();
 //  Middleware CORS (oblg)
 app.use(
   cors({
-    origin: "http://localhost:4200", // 
-    credentials: true, 
+    origin: "http://localhost:4200", //
+    credentials: true,
   })
 );
 
@@ -35,7 +35,13 @@ mongoose
 const authRoutes = require("../routes/auth");
 const userRoutes = require("../routes/users");
 
-//  Définir les routes
+//  Importer les routes des étudiants et enseignants
+const studentRoutes = require("../routes/students");
+const teacherRoutes = require("../routes/teachers");
+//  definire les  routes
+app.use("/api/students", studentRoutes);
+app.use("/api/teachers", teacherRoutes);
+
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
 
@@ -63,7 +69,7 @@ app.post("/upload", upload.single("file"), async (req, res) => {
     await newFile.save();
 
     res.status(201).json({
-      message: "✅ Fichier enregistré avec succès",
+      message: " Fichier enregistré avec succès",
       file: newFile,
     });
   } catch (err) {
