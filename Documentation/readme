@@ -1,0 +1,36 @@
+
+
+# Plateforme pédagogique – Backend MongoDB
+
+## Description
+
+Backend d’une plateforme pédagogique inspirée de Moodle, utilisant **MongoDB** et **Mongoose** pour gérer utilisateurs, fichiers, devoirs, forums et logs d’activités. Serveur Express connecté à une base MongoDB Atlas, avec gestion d’uploads locaux.
+
+## Fonctionnalités principales
+
+* **Historique des activités** : collecte des actions utilisateur (`login`, `course_view`, etc.) dans `activitylogs` avec métadonnées (IP, appareil, ressource).
+* **Gestion des fichiers** : upload de fichiers dans `/uploads/` et stockage des métadonnées (nom, type, taille, cours, utilisateur, date).
+* **Gestion des devoirs** : création, soumission multiple, correction, mise à jour des statuts (en retard, corrigé), statistiques.
+* **Forums de discussion** : création de forums, ajout de posts et réponses, nettoyage des contenus, limitation de taille, statistiques.
+* **Gestion utilisateurs** : création, authentification, rôles, hachage des mots de passe, suivi de dernière connexion, validation d’unicité.
+* **API REST** : routes pour fichiers, devoirs, forums, utilisateurs, logs et métadonnées.
+
+## Tech stack
+
+* Node.js & Express
+* MongoDB Atlas & Mongoose
+* Multer pour upload fichiers
+* JSON pour échanges front-back
+
+## Routes principales
+
+* `POST /api/files/upload` — upload fichier + métadonnées
+* `PATCH /api/files/:id` — mise à jour métadonnées fichier
+* `GET /api/files/search` — recherche fichiers par métadonnées
+* `GET /api/activities` — consultation logs avec filtres
+* `POST /api/forums` — création forum
+* `POST /api/forums/:id/messages` — ajout message dans forum
+* `GET /api/forums` — liste des forums
+* `GET /api/users` — test route utilisateur
+
+
