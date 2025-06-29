@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../Models/User");
+const Student = require("../Models/Student");
+const Teacher = require("../Models/Teacher");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
@@ -9,12 +11,18 @@ if (!JWT_SECRET) {
   throw new Error("JWT_SECRET is not defined in .env");
 }
 
-// Liste des rôles valides
 const validRoles = ["admin", "enseignant", "etudiant"];
 
-//  Login
+//////////////////////
+// 🔐 LOGIN
+//////////////////////
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
+
+  // ✅ Validation basique
+  if (!email || !password) {
+    return res.status(400).json({ message: "Email et mot de passe requis" });
+  }
 
   try {
     const user = await User.findOne({ email });
@@ -46,12 +54,23 @@ router.post("/login", async (req, res) => {
   }
 });
 
-//  Register
+//////////////////////
+// ✅ REGISTER
+//////////////////////
 router.post("/register", async (req, res) => {
-  const { username, email, password, role } = req.body;
+  const {
+    username,
+    email,
+    password,
+    role, // 'etudiant' ou 'enseignant'
+    filiere,
+    annee,
+    specialite,
+    grade,
+    dateNaissance,
+  } = req.body;
 
-  //  Vérification du rôle
-  if (!validRoles.includes(role)) {
+  if (!["etudiant", "enseignant"].includes(role)) {
     return res.status(400).json({ message: "Rôle invalide" });
   }
 
@@ -61,14 +80,43 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ message: "Email déjà utilisé" });
     }
 
-    const user = new User({ username, email, password, role });
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = new User({
+      username,
+      email,
+      password: hashedPassword,
+      role,
+    });
+
     await user.save();
+
+    if (role === "etudiant") {
+      const student = new Student({
+        userId: user._id,
+        filiere,
+        annee,
+        dateNaissance,
+      });
+      await student.save();
+    }
+
+    if (role === "enseignant") {
+      const teacher = new Teacher({
+        userId: user._id,
+        specialite,
+        grade,
+        dateNaissance,
+      });
+      await teacher.save();
+    }
 
     const token = jwt.sign({ userId: user._id, role: user.role }, JWT_SECRET, {
       expiresIn: "7d",
     });
 
     res.status(201).json({
+      message: "Utilisateur enregistré avec succès",
       token,
       user: {
         id: user._id,

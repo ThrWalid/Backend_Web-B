@@ -4,41 +4,19 @@ const bcrypt = require("bcryptjs");
 // Schéma utilisateur
 const userSchema = new mongoose.Schema(
   {
-    username: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
-    },
+    username: { type: String, required: true, unique: true },
+    email: { type: String, required: true, unique: true, lowercase: true },
+    password: { type: String, required: true },
     role: {
       type: String,
-      enum: ["etudiant", "enseignant", "admin"],
-      default: "etudiant",
-    },
-    email: {
-      type: String,
+      enum: ["admin", "enseignant", "etudiant"],
       required: true,
-      unique: true,
-      trim: true,
-      lowercase: true,
     },
-    password: {
-      type: String,
-      required: true,
-      minlength: 6,
-    },
-    lastLogin: Date,
-    coursesEnrolled: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Course",
-      },
-    ],
   },
-  {
-    timestamps: true, //  createdAt et updatedAt automatiques
-  }
+  { timestamps: true }
 );
+
+module.exports = mongoose.model("User", userSchema);
 
 /////////////////////////////////////////
 // Middleware ➝ Avant sauvegarde

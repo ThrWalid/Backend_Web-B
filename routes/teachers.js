@@ -5,22 +5,19 @@ const User = require("../Models/User");
 const bcrypt = require("bcryptjs");
 const { verifyToken, verifyRole } = require("../middlewares/middleware");
 
-//  Register Teacher (admin uniquement)
+// ✅ ➕ Register Teacher
 router.post("/register", verifyToken, verifyRole("admin"), async (req, res) => {
-  const { username, email, password, specialite, grade, dateNaissance } =
-    req.body;
+  const { username, email, password, specialite, grade, dateNaissance } = req.body;
 
   try {
-    // Vérifie si l'email existe déjà
+    // Check if email exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "Email déjà utilisé" });
     }
 
-    // Hash du mot de passe
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Crée l'utilisateur
     const user = new User({
       username,
       email,
@@ -29,7 +26,6 @@ router.post("/register", verifyToken, verifyRole("admin"), async (req, res) => {
     });
     await user.save();
 
-    // Crée le profil enseignant
     const teacher = new Teacher({
       userId: user._id,
       specialite,
@@ -54,7 +50,7 @@ router.post("/register", verifyToken, verifyRole("admin"), async (req, res) => {
   }
 });
 
-//  Get All Teachers (admin uniquement)
+// ✅ 🔍 Get All Teachers
 router.get("/", verifyToken, verifyRole("admin"), async (req, res) => {
   try {
     const teachers = await Teacher.find().populate("userId", "-password");
@@ -65,7 +61,7 @@ router.get("/", verifyToken, verifyRole("admin"), async (req, res) => {
   }
 });
 
-//  Update Teacher (admin uniquement)
+// ✅ 🔄 Update Teacher
 router.put("/:id", verifyToken, verifyRole("admin"), async (req, res) => {
   const { specialite, grade, dateNaissance } = req.body;
 
@@ -90,7 +86,7 @@ router.put("/:id", verifyToken, verifyRole("admin"), async (req, res) => {
   }
 });
 
-//  Delete Teacher (admin uniquement)
+// ✅ ❌ Delete Teacher
 router.delete("/:id", verifyToken, verifyRole("admin"), async (req, res) => {
   try {
     const teacher = await Teacher.findByIdAndDelete(req.params.id);
@@ -99,7 +95,6 @@ router.delete("/:id", verifyToken, verifyRole("admin"), async (req, res) => {
       return res.status(404).json({ message: "Enseignant non trouvé" });
     }
 
-    // Supprime aussi le user lié
     await User.findByIdAndDelete(teacher.userId);
 
     res.json({ message: "Enseignant et utilisateur supprimés avec succès" });
